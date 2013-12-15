@@ -40,7 +40,6 @@ def login_to_logitech(args):
 
     return session_token
 
-
 def show_config(args):
     """Connects to the Harmony and prints its configuration."""
     token = login_to_logitech(args)
