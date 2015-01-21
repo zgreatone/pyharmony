@@ -89,6 +89,20 @@ class HarmonyClient(sleekxmpp.ClientXMPP):
         action_cmd = payload[0]
         return action_cmd.text
 
+    def sync(self):
+        """Syncs the harmony hub with the web service.
+        """
+        iq_cmd = self.Iq()
+        iq_cmd['type'] = 'get'
+        action_cmd = ET.Element('oa')
+        action_cmd.attrib['xmlns'] = 'connect.logitech.com'
+        action_cmd.attrib['mime'] = ('setup.sync')
+        iq_cmd.set_payload(action_cmd)
+        result = iq_cmd.send(block=True)
+        payload = result.get_payload()
+        assert len(payload) == 1
+        return True
+
     def turn_off(self):
         """Turns the system off if it's on, otherwise it does nothing.
 
