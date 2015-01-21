@@ -4,7 +4,7 @@
 
 import argparse
 import logging
-import pprint
+import json
 import sys
 
 from harmony import auth
@@ -19,6 +19,7 @@ class EmbeddedConsole(code.InteractiveConsole):
     except:
       print("Debug console closing...")
 
+LOGGER = logging.getLogger(__name__)
 
 def login_to_logitech(args):
     """Logs in to the Logitech service.
@@ -40,30 +41,48 @@ def login_to_logitech(args):
 
     return session_token
 
-def show_config(args):
-    """Connects to the Harmony and prints its configuration."""
+def pprint(obj):
+    """Pretty JSON dump of an object."""
+    print(json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': ')))
+
+def get_client(args):
+    """Connect to the Harmony and return a Client instance."""
     token = login_to_logitech(args)
     client = harmony_client.create_and_connect_client(
         args.harmony_ip, args.harmony_port, token)
-    pprint.pprint(client.get_config())
+    return client
+
+def show_config(args):
+    """Connects to the Harmony and prints its configuration."""
+    client = get_client(args)
+    pprint(client.get_config())
     client.disconnect(send_close=True)
     return 0
 
 def repl(args):
     """Connects to the Harmony and start ipython with client"""
-    token = login_to_logitech(args)
-    client = harmony_client.create_and_connect_client(
-        args.harmony_ip, args.harmony_port, token)
+    client = get_client(args)
     console = EmbeddedConsole(locals())
     console.start()
+
+
+def show_current_activity(args):
+    """Connects to the Harmony and prints the current activity block
+    from the config."""
+    client = get_client(args)
+    config = client.get_config()
+    current_activity_id = client.get_current_activity()
+
+    activity = [x for x in config['activity'] if int(x['id']) == current_activity_id][0]
+
+    pprint(activity)
+
     client.disconnect(send_close=True)
     return 0
 
 def start_activity(args):
     """Connects to the Harmony and starts an activity"""
-    token = login_to_logitech(args)
-    client = harmony_client.create_and_connect_client(
-        args.harmony_ip, args.harmony_port, token)
+    client = get_client(args)
     config = client.get_config()
     activities = config['activity']
     labels_and_ids = dict([(a['label'], a['id']) for a in activities])
@@ -103,26 +122,34 @@ def main():
         help='Logging level to print to the console.')
 
     subparsers = parser.add_subparsers()
-    list_devices_parser = subparsers.add_parser(
+
+    show_config_parser = subparsers.add_parser(
         'show_config', help='Print the Harmony device configuration.')
-    list_devices_parser.set_defaults(func=show_config)
+    show_config_parser.set_defaults(func=show_config)
+
+    show_activity_parser = subparsers.add_parser(
+        'show_current_activity', help='Print the current activity config.')
+    show_activity_parser.set_defaults(func=show_current_activity)
+
+    start_activity_parser = subparsers.add_parser(
+        'start_activity', help='Switch to a different activity.')
+
+    start_activity_parser.add_argument(
+        'activity', help='Activity to switch to, id or label.')
+
+    start_activity_parser.set_defaults(func=start_activity)
 
     repl_parser = subparsers.add_parser(
         'repl', help='Start a client repl')
     repl_parser.set_defaults(func=repl)
 
-    start_activity_parser = subparsers.add_parser(
-        'start', help='Start an activity whose name contains arg')
-    start_activity_parser.set_defaults(func=start_activity)
-    start_activity_parser.add_argument("activity", help="String to match activity")
     args = parser.parse_args()
 
     logging.basicConfig(
         level=loglevels[args.loglevel],
-        format='%(levelname)s\t%(name)s\t%(message)s')
+        format='%(levelname)s:\t%(name)s\t%(message)s')
 
     sys.exit(args.func(args))
-
 
 if __name__ == '__main__':
     main()
