@@ -117,7 +117,7 @@ class HarmonyClient(sleekxmpp.ClientXMPP):
         result = iq_cmd.send(block=False)
         return True
 
-    def turn_off(self):
+    def power_off(self):
         """Turns the system off if it's on, otherwise it does nothing.
 
         Returns:

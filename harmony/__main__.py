@@ -80,13 +80,19 @@ def show_current_activity(args):
     client.disconnect(send_close=True)
     return 0
 
+def power_off(args):
+    """Connects to the Harmony and syncs it.
+    """
+    client = get_client(args)
+    client.power_off()
+    client.disconnect(send_close=True)
+    return 0
+
 def sync(args):
     """Connects to the Harmony and syncs it.
     """
     client = get_client(args)
-
     client.sync()
-
     client.disconnect(send_close=True)
     return 0
 
@@ -162,6 +168,10 @@ def main():
     repl_parser = subparsers.add_parser(
         'repl', help='Start a client repl')
     repl_parser.set_defaults(func=repl)
+
+    power_off_parser = subparsers.add_parser(
+        'power_off', help='Stop the activity.')
+    power_off_parser.set_defaults(func=power_off)
 
     sync_parser = subparsers.add_parser(
         'sync', help='Sync the harmony.')
