@@ -1,7 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """Command line utility for querying the Logitech Harmony."""
 
+from __future__ import print_function
 import argparse
 import logging
 import json
@@ -102,15 +103,15 @@ def start_activity(args):
     config = client.get_config()
     activities = config['activity']
     labels_and_ids = dict([(a['label'], a['id']) for a in activities])
-    matching = [label for label in labels_and_ids.keys()
+    matching = [label for label in list(labels_and_ids.keys())
                 if args.activity.lower() in label.lower()]
     if len(matching) == 1:
         activity = matching[0]
-        print "Found activity named %s (id %s)" % (activity,
-                                                   labels_and_ids[activity])
+        print("Found activity named %s (id %s)" % (activity,
+                                                   labels_and_ids[activity]))
         client.start_activity(labels_and_ids[activity])
     else:
-        print "found too many! %s" % (" ".join(matching))
+        print("found too many! %s" % (" ".join(matching)))
     client.disconnect(send_close=True)
     return 0
 
@@ -143,7 +144,7 @@ def main():
         'Network port that the Harmony is listening on.'))
     loglevels = dict((logging.getLevelName(level), level)
                      for level in [10, 20, 30, 40, 50])
-    parser.add_argument('--loglevel', default='INFO', choices=loglevels.keys(),
+    parser.add_argument('--loglevel', default='INFO', choices=list(loglevels.keys()),
         help='Logging level to print to the console.')
 
     subparsers = parser.add_subparsers()
