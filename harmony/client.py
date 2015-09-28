@@ -1,5 +1,5 @@
 """Client class for connecting to the Logitech Harmony."""
-
+from __future__ import print_function
 import json
 import logging
 import time
@@ -124,9 +124,9 @@ class HarmonyClient(sleekxmpp.ClientXMPP):
           True.
         """
         activity = self.get_current_activity()
-        print activity
+        print(activity)
         if activity != -1:
-            print "OFF"
+            print("OFF")
             self.start_activity(-1)
         return True
 
