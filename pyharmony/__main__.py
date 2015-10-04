@@ -8,8 +8,8 @@ import logging
 import json
 import sys
 
-from harmony import auth
-from harmony import client as harmony_client
+from pyharmony import auth
+from pyharmony import client as harmony_client
 
 import code
 

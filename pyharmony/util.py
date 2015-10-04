@@ -1,7 +1,7 @@
 import sys
 
-from harmony import auth
-from harmony import client as harmony_client
+from pyharmony import auth
+from pyharmony import client as harmony_client
 
 def get_client(harmony_ip, harmony_port, email, password):
     token = auth.login(email, password)
