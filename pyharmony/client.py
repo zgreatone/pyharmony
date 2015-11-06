@@ -7,7 +7,6 @@ import time
 import sleekxmpp
 from sleekxmpp.xmlstream import ET
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -105,6 +104,13 @@ class HarmonyClient(sleekxmpp.ClientXMPP):
     def send_command(self, device_id, command):
         """Send a simple command to the Harmony Hub.
         """
+        self.send_command_helper(device_id, command, "press")
+        time.sleep(0.2)
+        self.send_command_helper(device_id, command, "release")
+
+    def send_command_helper(self, device_id, command, status):
+        """Send a simple command to the Harmony Hub.
+        """
         iq_cmd = self.Iq()
         iq_cmd['type'] = 'get'
         iq_cmd['id'] = '5e518d07-bcc2-4634-ba3d-c20f338d8927-2'
@@ -112,9 +118,11 @@ class HarmonyClient(sleekxmpp.ClientXMPP):
         action_cmd.attrib['xmlns'] = 'connect.logitech.com'
         action_cmd.attrib['mime'] = (
             'vnd.logitech.harmony/vnd.logitech.harmony.engine?holdAction')
-        action_cmd.text = 'action={"type"::"IRCommand","deviceId"::"'+device_id+'","command"::"'+command+'"}:status=press'
+        action_cmd.text = 'action={"type"::"IRCommand","deviceId"::"' \
+                          + device_id + '","command"::"' + command + '"}:status=' \
+                          + status + ':timestamp=' + str(int(time.time()))
         iq_cmd.set_payload(action_cmd)
-        result = iq_cmd.send(block=False)
+        iq_cmd.send(block=False)
         return True
 
     def power_off(self):
@@ -129,6 +137,7 @@ class HarmonyClient(sleekxmpp.ClientXMPP):
             print("OFF")
             self.start_activity(-1)
         return True
+
 
 def create_and_connect_client(ip_address, port, token):
     """Creates a Harmony client and initializes session.

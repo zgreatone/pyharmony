@@ -13,14 +13,16 @@ from pyharmony import client as harmony_client
 
 import code
 
+
 class EmbeddedConsole(code.InteractiveConsole):
-  def start(self):
-    try:
-      self.interact("Debug console starting...")
-    except:
-      print("Debug console closing...")
+    def start(self):
+        try:
+            self.interact("Debug console starting...")
+        except:
+            print("Debug console closing...")
 
 LOGGER = logging.getLogger(__name__)
+
 
 def login_to_logitech(args):
     """Logs in to the Logitech service.
@@ -42,9 +44,11 @@ def login_to_logitech(args):
 
     return session_token
 
+
 def pprint(obj):
     """Pretty JSON dump of an object."""
     print(json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': ')))
+
 
 def get_client(args):
     """Connect to the Harmony and return a Client instance."""
@@ -53,12 +57,14 @@ def get_client(args):
         args.harmony_ip, args.harmony_port, token)
     return client
 
+
 def show_config(args):
     """Connects to the Harmony and prints its configuration."""
     client = get_client(args)
     pprint(client.get_config())
     client.disconnect(send_close=True)
     return 0
+
 
 def repl(args):
     """Connects to the Harmony and start ipython with client"""
@@ -81,6 +87,7 @@ def show_current_activity(args):
     client.disconnect(send_close=True)
     return 0
 
+
 def power_off(args):
     """Connects to the Harmony and syncs it.
     """
@@ -88,6 +95,7 @@ def power_off(args):
     client.power_off()
     client.disconnect(send_close=True)
     return 0
+
 
 def sync(args):
     """Connects to the Harmony and syncs it.
@@ -97,23 +105,33 @@ def sync(args):
     client.disconnect(send_close=True)
     return 0
 
+
 def start_activity(args):
     """Connects to the Harmony and starts an activity"""
     client = get_client(args)
     config = client.get_config()
     activities = config['activity']
     labels_and_ids = dict([(a['label'], a['id']) for a in activities])
-    matching = [label for label in list(labels_and_ids.keys())
-                if args.activity.lower() in label.lower()]
-    if len(matching) == 1:
-        activity = matching[0]
+    ids_and_labels = dict([(a['id'], a['label']) for a in activities])
+    matching_labels = [label for label in list(labels_and_ids.keys())
+                       if args.activity.lower() in label.lower()]
+    matching_ids = [ids for ids in list(ids_and_labels.keys())
+                   if args.activity.lower() in ids.lower()]
+    if len(matching_labels) == 1:
+        activity = matching_labels[0]
         print("Found activity named %s (id %s)" % (activity,
                                                    labels_and_ids[activity]))
         client.start_activity(labels_and_ids[activity])
+    elif len(matching_ids) == 1:
+        activity = matching_ids[0]
+        print("Found activity named %s (label %s)" % (activity,
+                                                      ids_and_labels[activity]))
+        client.start_activity(activity)
     else:
-        print("found too many! %s" % (" ".join(matching)))
+        print("found too many! %s" % (" ".join(matching_labels)))
     client.disconnect(send_close=True)
     return 0
+
 
 def send_command(args):
     """Connects to the Harmony and send a simple command."""
@@ -123,6 +141,7 @@ def send_command(args):
 
     client.disconnect(send_close=True)
     return 0
+
 
 def main():
     """Main method for the script."""
