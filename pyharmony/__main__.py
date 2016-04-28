@@ -21,6 +21,7 @@ class EmbeddedConsole(code.InteractiveConsole):
         except:
             print("Debug console closing...")
 
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -116,7 +117,7 @@ def start_activity(args):
     matching_labels = [label for label in list(labels_and_ids.keys())
                        if args.activity.lower() in label.lower()]
     matching_ids = [ids for ids in list(ids_and_labels.keys())
-                   if args.activity.lower() in ids.lower()]
+                    if args.activity.lower() in ids.lower()]
     if len(matching_labels) == 1:
         activity = matching_labels[0]
         print("Found activity named %s (id %s)" % (activity,
@@ -164,7 +165,7 @@ def main():
     loglevels = dict((logging.getLevelName(level), level)
                      for level in [10, 20, 30, 40, 50])
     parser.add_argument('--loglevel', default='INFO', choices=list(loglevels.keys()),
-        help='Logging level to print to the console.')
+                        help='Logging level to print to the console.')
 
     subparsers = parser.add_subparsers()
 
@@ -200,9 +201,9 @@ def main():
     command_parser = subparsers.add_parser(
         'send_command', help='Send a simple command.')
     command_parser.add_argument('--device_id',
-        help='Specify the device id to which we will send the command.')
+                                help='Specify the device id to which we will send the command.')
     command_parser.add_argument('--command',
-        help='IR Command to send to the device.')
+                                help='IR Command to send to the device.')
     command_parser.set_defaults(func=send_command)
 
     args = parser.parse_args()
@@ -212,6 +213,7 @@ def main():
         format='%(levelname)s:\t%(name)s\t%(message)s')
 
     sys.exit(args.func(args))
+
 
 if __name__ == '__main__':
     main()
